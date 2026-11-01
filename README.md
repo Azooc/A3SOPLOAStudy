@@ -2,11 +2,19 @@
 
 Practice Indy Area 3 SOPs and LOAs one aircraft at a time on a radar scope.
 
-**Live site:** https://azooc.github.io/A3SOPLOAStudy/
+This is the dev version, with the Build tab: https://azooc.github.io/A3SOPLOAStudy/
+
+The study-only version is [A3SOPLOAStudyLIVE](https://github.com/Azooc/A3SOPLOAStudyLIVE): https://azooc.github.io/A3SOPLOAStudyLIVE/. It uses the same files except [`edition.js`](edition.js), which is set to `"live"` there.
 
 ## Study
 
-Pick the sector you're working (CRW, BLF, BKW, BOB or HNN) at the top. Each question puts one aircraft on the scope, with its route if it has one. Think through the answer (or type it), then hit **Show answer**.
+Pick what you're studying at the top:
+
+- **North**: BOB, CRW and HNN
+- **South**: CRW and BLF
+- **Combined**: all of them
+
+Each question puts one aircraft on the scope, with its route if it has one, and shows which sector it's for. Think through the answer (or type it), then hit **Show answer**.
 
 `Space` shows the answer, `←` / `→` go to the previous / next question. **Shuffle** mixes up the order.
 
@@ -29,6 +37,7 @@ Your work in progress is kept in the browser, so a refresh won't lose it.
 
 - [`scenarios.js`](scenarios.js): the study questions (paste saved output here)
 - [`map.js`](map.js): the sector boundary lines and the part of the map the scope shows
+- [`edition.js`](edition.js): `"dev"` here, `"live"` in the study-only repo
 - `index.html`, `styles.css`, `app.js`: the site itself. No build step.
 
 To run it locally, serve the folder with any static server, for example:

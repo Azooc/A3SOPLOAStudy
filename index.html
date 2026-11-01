@@ -11,8 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="edition.js"></script>
 </head>
-<body data-view="build" data-tool="move" data-sweep="on">
+<body data-view="study" data-tool="move">
   <header class="topbar" id="topbar">
     <div class="brand">
       <svg class="logo" viewBox="0 0 34 34" aria-hidden="true">
@@ -28,7 +29,7 @@
       </div>
     </div>
 
-    <div class="sector-pick" id="sector-pick" role="radiogroup" aria-label="Sector you're working"></div>
+    <div class="area-pick" id="area-pick" role="radiogroup" aria-label="Area to study"></div>
 
     <nav class="tabs" aria-label="Mode">
       <a href="#study" id="tab-study">Study</a>
@@ -40,7 +41,6 @@
     <section class="scope-col">
       <div class="scope" id="scope">
         <div class="fx grid"></div>
-        <div class="fx sweep"></div>
         <svg id="radar" viewBox="172 178 576 576" role="img" aria-label="Radar scope">
           <defs>
             <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="833" height="843">
@@ -56,7 +56,6 @@
         <div class="fx scan"></div>
         <div class="fx vignette"></div>
         <div class="scope-tag" id="scope-tag"></div>
-        <button type="button" class="sweep-toggle" id="sweep-toggle" aria-pressed="true" title="Turn the radar sweep on or off">Sweep</button>
       </div>
       <p class="hint" id="hint"></p>
     </section>
@@ -71,7 +70,10 @@
           </div>
 
           <div class="study-body" id="study-body">
-            <p class="q-text" id="q-text"></p>
+            <div class="q-wrap">
+              <span class="chip" id="q-sector"></span>
+              <p class="q-text" id="q-text"></p>
+            </div>
             <label class="field">
               <span class="label">Your answer <em>optional</em></span>
               <textarea id="my-answer" rows="3" placeholder="Say it or type it, then check."></textarea>
@@ -84,8 +86,8 @@
           </div>
 
           <div class="empty" id="study-empty" hidden>
-            <p><strong>No <span id="empty-sector"></span> questions yet.</strong></p>
-            <p>Make one in <a href="#build">Build</a>, hit Save, and send the output over to get it added.</p>
+            <p><strong>No <span id="empty-area"></span> questions yet.</strong></p>
+            <p class="dev-only">Make one in <a href="#build">Build</a>, hit Save, and send the output over to get it added.</p>
           </div>
         </div>
 

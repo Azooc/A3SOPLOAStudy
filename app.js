@@ -16,6 +16,16 @@
   ];
   const SECTOR_IDS = SECTORS.map((s) => s.id);
 
+  // What you can pick to study. A question shows up in every area its sector is in.
+  const AREAS = [
+    { id: "north", name: "North", sectors: ["BOB", "CRW", "HNN"] },
+    { id: "south", name: "South", sectors: ["CRW", "BLF"] },
+    { id: "combined", name: "Combined", sectors: SECTOR_IDS },
+  ];
+
+  // The live edition is study only; the dev edition also has the Build tab.
+  const LIVE = document.documentElement.dataset.edition === "live";
+
   // Track symbol sizes, in map units. They grow on small screens so the
   // data block stays readable.
   const SYM = {
@@ -32,7 +42,7 @@
   const SNAP_TO_PLANE = 10; // how close a first route click must be to start on the plane
   const DEFAULTS = { hdg: 45, vec: 40, dbx: -58, dby: -50 };
   const AC_KEYS = ["callsign", "alt", "cid", "spd", "line4"];
-  const KEY = { draft: "a3sop-draft", sector: "a3sop-sector", shuffle: "a3sop-shuffle", sweep: "a3sop-sweep" };
+  const KEY = { draft: "a3sop-draft", area: "a3sop-area", shuffle: "a3sop-shuffle" };
 
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -179,7 +189,7 @@
   let drag = null;
 
   const study = {
-    sector: SECTOR_IDS.includes(store.get(KEY.sector)) ? store.get(KEY.sector) : SECTOR_IDS[0],
+    area: AREAS.find((a) => a.id === store.get(KEY.area)) || AREAS[AREAS.length - 1],
     shuffle: store.get(KEY.shuffle) === "1",
     order: [],
     i: 0,
@@ -277,7 +287,7 @@
       drawRoute(sc && Array.isArray(sc.route) ? sc.route.map(([x, y]) => ({ x, y })) : []);
       gHandles.textContent = "";
       const n = deck().length;
-      tag.textContent = n ? `${study.sector}  ${study.i + 1}/${n}` : study.sector;
+      tag.textContent = sc ? `${sc.sector}  ${study.i + 1}/${n}` : study.area.name.toUpperCase();
     }
   }
 
@@ -657,8 +667,12 @@
 
   // ---------- Study ----------
 
+  function inArea(s, area) {
+    return area.sectors.includes(s.sector);
+  }
+
   function deck() {
-    return SCENARIOS.filter((s) => s.sector === study.sector);
+    return SCENARIOS.filter((s) => inArea(s, study.area));
   }
 
   function currentScenario() {
@@ -679,18 +693,18 @@
     study.revealed = false;
   }
 
-  const pick = $("sector-pick");
-  for (const s of SECTORS) {
+  const pick = $("area-pick");
+  for (const area of AREAS) {
     const b = document.createElement("button");
     b.type = "button";
     b.setAttribute("role", "radio");
-    b.dataset.sector = s.id;
-    b.title = `${s.name} (${s.num})`;
-    const count = SCENARIOS.filter((x) => x.sector === s.id).length;
-    b.innerHTML = `<span>${s.id}</span><i>${count}</i>`;
+    b.dataset.area = area.id;
+    b.title = area.sectors.join(", ");
+    const count = SCENARIOS.filter((s) => inArea(s, area)).length;
+    b.innerHTML = `<span>${area.name}</span><i>${count}</i>`;
     b.addEventListener("click", () => {
-      study.sector = s.id;
-      store.set(KEY.sector, s.id);
+      study.area = area;
+      store.set(KEY.area, area.id);
       buildOrder();
       $("my-answer").value = "";
       renderStudy();
@@ -701,12 +715,16 @@
   function renderStudy() {
     const d = deck();
     const sc = currentScenario();
-    for (const b of pick.children) b.setAttribute("aria-checked", String(b.dataset.sector === study.sector));
+    for (const b of pick.children) b.setAttribute("aria-checked", String(b.dataset.area === study.area.id));
     $("study-body").hidden = !sc;
     $("study-empty").hidden = !!sc;
-    $("empty-sector").textContent = study.sector;
-    $("study-count").textContent = sc ? `${study.sector} · ${study.i + 1} of ${d.length}` : `${study.sector} · no questions`;
+    $("empty-area").textContent = study.area.name;
+    $("study-count").textContent = sc ? `${study.area.name} · ${study.i + 1} of ${d.length}` : `${study.area.name} · no questions`;
     if (sc) {
+      const sector = SECTORS.find((s) => s.id === sc.sector);
+      const chip = $("q-sector");
+      chip.textContent = sc.sector;
+      chip.title = sector ? `${sector.name} (${sector.num})` : "";
       $("q-text").textContent = sc.question || "";
       $("a-text").textContent = sc.answer || "";
       $("answer").hidden = !study.revealed;
@@ -786,6 +804,7 @@
   // ---------- Views ----------
 
   function viewFromHash() {
+    if (LIVE) return "study";
     const h = location.hash.slice(1);
     if (h === "study" || h === "build") return h;
     return SCENARIOS.length ? "study" : "build";
@@ -807,19 +826,7 @@
 
   window.addEventListener("hashchange", () => setView(viewFromHash()));
 
-  // ---------- Sweep, sizing, start ----------
-
-  const sweepBtn = $("sweep-toggle");
-  function setSweep(on) {
-    document.body.dataset.sweep = on ? "on" : "off";
-    sweepBtn.setAttribute("aria-pressed", String(on));
-  }
-  setSweep(store.get(KEY.sweep) !== "off");
-  sweepBtn.addEventListener("click", () => {
-    const on = document.body.dataset.sweep !== "on";
-    setSweep(on);
-    store.set(KEY.sweep, on ? "on" : "off");
-  });
+  // ---------- Sizing, start ----------
 
   const topbar = $("topbar");
   new ResizeObserver(() => {
